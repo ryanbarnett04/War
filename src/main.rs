@@ -54,27 +54,8 @@ fn main() {
 
     // Create vector of Card type to initialise the deck with
     let deck: Vec<Card> = create_deck();
-    let mut shuffled_deck: Vec<Card> = shuffle_deck(deck);                  // Shuffle cards
-    let mut p1_start: Vec<Card> = Vec::new();
-    let mut p2_start: Vec<Card> = Vec::new();
-    let deck_length: usize = shuffled_deck.len();
-
-    // Split shuffled deck down the middle into two starting hands
-    for outer in 0..2 {
-        for _inner in 0..(deck_length / 2) {
-            let current_card: Option<Card> = shuffled_deck.pop();
-            match current_card {
-                None => { std::process::exit(0) }
-                Some(x) => {
-                    if outer == 0 {
-                        p1_start.push(x);
-                    } else {
-                        p2_start.push(x);
-                    }
-                }
-            }
-        }
-    }
+    let shuffled_deck: Vec<Card> = shuffle_deck(deck);
+    let (p1_start, p2_start) = split_deck(shuffled_deck);
 
     // Create the players
     let player_1: Player = Player {
@@ -131,6 +112,52 @@ fn shuffle_deck(mut deck: Vec<Card>) -> Vec<Card> {
     shuffled_deck
 }
 
+fn split_deck(mut deck: Vec<Card>) -> (Vec<Card>, Vec<Card>) {
+    let mut first_half: Vec<Card> = Vec::new();
+    let mut second_half: Vec<Card> = Vec::new();
+    let deck_length: usize = deck.len();
+
+    // Split shuffled deck down the middle into two starting hands
+    for outer in 0..2 {
+        for _inner in 0..(deck_length / 2) {
+            let current_card: Option<Card> = deck.pop();
+            match current_card {
+                None => { std::process::exit(0) }
+                Some(x) => {
+                    if outer == 0 {
+                        first_half.push(x);
+                    } else {
+                        second_half.push(x);
+                    }
+                }
+            }
+        }
+    }
+
+    (first_half, second_half)
+}
+
+fn war_winner(p1_card: Card, p2_card: Card, winner: &mut Player, loser: &mut Player, index: usize) {
+    winner.collected_hand.push(p1_card);
+    winner.collected_hand.push(p2_card);
+    for _i in 0..index + 1 {
+        let temp_card: Option<Card> = winner.current_hand.pop();
+        match temp_card {
+            None => { std::process::exit(0) },
+            Some(x) => {
+                winner.collected_hand.push(x);
+            }
+        }
+        let temp_card: Option<Card> = loser.current_hand.pop();
+        match temp_card {
+            None => { std::process::exit(0) },
+            Some(x) => {
+                winner.collected_hand.push(x);
+            }
+        }
+    }
+}
+
 fn game_loop(mut p1: Player, mut p2: Player) {
 
     loop {
@@ -173,46 +200,12 @@ fn game_loop(mut p1: Player, mut p2: Player) {
                 }
 
                 if p1.current_hand[index].get_weight() > p2.current_hand[index].get_weight() {
-                    p1.collected_hand.push(p1_card);
-                    p1.collected_hand.push(p2_card);
-                    for _i in 0..index + 1 {
-                        let temp_card: Option<Card> = p1.current_hand.pop();
-                        match temp_card {
-                            None => { std::process::exit(0) },
-                            Some(x) => {
-                                p1.collected_hand.push(x);
-                            }
-                        }
-                        let temp_card: Option<Card> = p2.current_hand.pop();
-                        match temp_card {
-                            None => { std::process::exit(0) },
-                            Some(x) => {
-                                p1.collected_hand.push(x);
-                            }
-                        }
-                    }
+                    war_winner(p1_card, p2_card, &mut p1, &mut p2, index);
                     break;
                 }
 
                 if p1.current_hand[index].get_weight() < p2.current_hand[index].get_weight() {
-                    p2.collected_hand.push(p1_card);
-                    p2.collected_hand.push(p2_card);
-                    for _i in 0..index + 1 {
-                        let temp_card: Option<Card> = p1.current_hand.pop();
-                        match temp_card {
-                            None => { std::process::exit(0) },
-                            Some(x) => {
-                                p2.collected_hand.push(x);
-                            }
-                        }
-                        let temp_card: Option<Card> = p2.current_hand.pop();
-                        match temp_card {
-                            None => { std::process::exit(0) },
-                            Some(x) => {
-                                p2.collected_hand.push(x);
-                            }
-                        }
-                    }
+                    war_winner(p1_card, p2_card, &mut p2, &mut p1, index);
                     break;
                 }
 
