@@ -60,12 +60,12 @@ fn main() {
     // Create the players
     let player_1: Player = Player {
         current_hand: p1_start,
-        collected_hand: Vec::new()
+        collected_hand: Vec::with_capacity(52)
     };
 
     let player_2: Player = Player {
         current_hand: p2_start,
-        collected_hand: Vec::new()
+        collected_hand: Vec::with_capacity(52)
     };
 
     // Start game
@@ -76,7 +76,7 @@ fn main() {
 fn create_deck() -> Vec<Card> {
 
     // Create vector of Card type, and two fixed sized arrays representing the card Suits and Faces
-    let mut deck: Vec<Card> = Vec::new();
+    let mut deck: Vec<Card> = Vec::with_capacity(52);
     let suits: [&str; 4] = ["Diamonds", "Clubs", "Hearts", "Spades"];
     let faces: [&str; 13] = ["Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King", "Ace"];
 
@@ -101,7 +101,7 @@ fn create_deck() -> Vec<Card> {
 
 fn shuffle_deck(mut deck: Vec<Card>) -> Vec<Card> {
 
-    let mut shuffled_deck: Vec<Card> = Vec::new();
+    let mut shuffled_deck: Vec<Card> = Vec::with_capacity(52);
 
     while !deck.is_empty() {
         let random_index: usize = rand::rng().random_range(0..=deck.len() - 1);
@@ -113,8 +113,8 @@ fn shuffle_deck(mut deck: Vec<Card>) -> Vec<Card> {
 }
 
 fn split_deck(mut deck: Vec<Card>) -> (Vec<Card>, Vec<Card>) {
-    let mut first_half: Vec<Card> = Vec::new();
-    let mut second_half: Vec<Card> = Vec::new();
+    let mut first_half: Vec<Card> = Vec::with_capacity(26);
+    let mut second_half: Vec<Card> = Vec::with_capacity(26);
     let deck_length: usize = deck.len();
 
     // Split shuffled deck down the middle into two starting hands
